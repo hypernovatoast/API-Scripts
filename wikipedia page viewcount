@@ -1,0 +1,42 @@
+#!/bin/bash
+
+### The variables ###
+API="https://wikimedia.org/api/rest_v1"
+header=[redacted]"
+
+#### The script ####
+
+## Prompts the user for who they'd like to search for, start date, and finish date.
+read -r -p "What article would you like to see the viewcount for?: " article
+read -r -p "What starting date? (yyyymmdd format): " start
+read -r -p "What ending date? (yyyymmdd format): " fin
+article=$(echo "$article" | awk '{for(i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2) }}1' | sed -E 's/ /_/g') #text formatting. first letter uppercase, other letters lowercase, spaces into underscores
+
+## The API request
+apicall() {
+    curl \
+        -H "$header" \
+        "$API/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/$article/daily/$start/$fin" | \
+    jq '.items[] | [.timestamp,.views]'
+}
+
+## The CSV output
+csv() {
+    clear
+    
+    csvpath="$HOME/localScripts/$article.csv"
+    topLine="date,views" #This will be the first line of the CSV script to identify the columns
+    
+    #If/Else statement to verify Wiki article exists.
+    if
+        curl "https://en.wikipedia.org/wiki/$article" | grep -i "Wikipedia does not have an article with this exact name." > /dev/null ; then
+        echo "No article exists."
+    else
+        printf "%s\n%s\n\n" "$article Views" "$topLine" > "$csvpath"
+        apicall | jq -r @csv >> "$csvpath"
+        echo "Your file is available at $csvpath"
+    fi
+}
+
+## The execution
+csv
