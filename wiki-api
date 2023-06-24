@@ -1,0 +1,18 @@
+#!/bin/bash
+
+## variables
+API="https://wikimedia.org/api/rest_v1"
+header="Email - []"
+article="Taylor_Swift"
+start="20230101" #Start Date - Format yyyyMMdd
+fin="20230623" #End Date - Format yyyyMMdd
+
+## the script
+apicall() {
+    curl \
+        -H "$header" \
+        "$API/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/$article/daily/$start/$fin" | \
+    jq
+}
+
+apicall
