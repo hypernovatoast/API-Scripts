@@ -24,7 +24,6 @@ topLine="date,views" #This will be the first line of the CSV script to identify 
 
 csv() {
     printf "%s\n%s\n\n" "$outputName Views" "$topLine" > "$csvpath"
-    #printf "%s\n\n" "$topLine" > "$csvpath"
     apicall | jq -r @csv >> "$csvpath"
 }
 
